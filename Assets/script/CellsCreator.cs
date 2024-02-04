@@ -90,7 +90,7 @@ public class CellsCreator : MonoBehaviour
             }
             else
             {
-                SelectMas();
+                SelectNewMasu();
             }
          
         }
@@ -354,7 +354,7 @@ public class CellsCreator : MonoBehaviour
         }
     }
 
-    void SelectMas() //選択したマスオブジェクトを取得する
+    (int,int) Selectmasu()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
@@ -375,71 +375,77 @@ public class CellsCreator : MonoBehaviour
 
             int b = masuInfo.GetKomaNum(a);
 
-            if (0 < b && b < 31)
-            {
-                CurrentMasuNum = a;
-
-                CurrentKomaNum = b;
-
-                SelectDestinationMode = true;
-
-            }
-            else 
-            { 
-                
-            }
+            return (a,b);
+        } else
+        {
+            return (0,0);
         }
+    }
+    void SelectNewMasu() //選択したマスオブジェクトを取得する
+    {
+
+        var c = Selectmasu();
+
+        int a = c.Item1;
+        int b = c.Item2;
+        
+        if (0 < b && b < 31)
+        {
+            CurrentMasuNum = a;
+
+            CurrentKomaNum = b;
+
+            SelectDestinationMode = true;
+
+        }
+        else 
+        { 
+                
+        }
+       
     }
 
 
     public void SelectDestination()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit = new RaycastHit();
-        if (Physics.Raycast(ray, out hit))
+
+        var c = Selectmasu();
+
+        int a = c.Item1;
+
+        CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
+        //masHandlerスクリプトの取得
+
+        if (7 < a / 15 && a / 15 < 10)
         {
-            clickedGameObject = hit.collider.gameObject;
-            MasHandler masHandler = clickedGameObject.GetComponent<MasHandler>();
-            int a = masHandler.masNumber;
-
-            CellsSelector cellsSelector = clickedGameObject.GetComponent<CellsSelector>();
-            //CellsSelectorスクリプトの取得
-
-            CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
-            //masHandlerスクリプトの取得
-
-            //Debug.Log("selectDestination");
-
-            if (7 < a / 15 && a / 15 < 10)
+            if (4 < a % 15 && a % 15 < 10)
             {
-                if (4 < a % 15 && a % 15 < 10)
-                {
-                    DestinationMasNum = a;
-                    //駒が動く先のマスにいる駒番号
+                DestinationMasNum = a;
+                //駒が動く先のマスにいる駒番号
 
-                    MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
-                    //masuInfo スクリプトの取得
-                    DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
-                    //動かす先の駒の番号を取得する
+                MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+                //masuInfo スクリプトの取得
+                DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
+                //動かす先の駒の番号を取得する
 
-                    UnTargetField();
-                    //マスターゲットオフ
-                    cellsHilighter.HilightWhite();
-                    //フィールドをハイライト
-                    SwitchKomaNum();
-                    //駒をスイッチする
-                }
-                else
-                {
-
-                }
+                UnTargetField();
+                //マスターゲットオフ
+                cellsHilighter.HilightWhite();
+                //フィールドをハイライト
+                SwitchKomaNum();
+                //駒をスイッチする
             }
             else
             {
 
             }
+        }
+        else
+        {
 
         }
+
+        
         
     }
 
