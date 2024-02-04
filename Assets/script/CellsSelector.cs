@@ -12,10 +12,11 @@ public class CellsSelector : MonoBehaviour
 
     void Start()
     {
-     
+       
 
     }
     
+
     void OnMouseOver()
     {
         MasHandler masHandler = GetComponent<MasHandler>();
@@ -30,33 +31,42 @@ public class CellsSelector : MonoBehaviour
         komaNum = masuInfo.GetKomaNum(selectedPosNumber);
         //盤面上の駒が何か判別する
 
+        CellsHilighter cellsHilighter = GetComponent<CellsHilighter>();
+        //masHandlerスクリプトの取得
+
         if (masLock == false && 0 < komaNum && komaNum< 31)　//マスロックが掛かってなく、かつ、自駒の場合
         {
-            masHandler.CangeMasColor(255, 255, 255);
+            cellsHilighter.HilightWhite();
             //キューブをハイライト
-            
+        }
+        else
+        {
+            cellsHilighter.HilightDefault();
         }
 
         if (masTarget == true)
         {
-            masHandler.CangeMasColor(255, 122, 122);
+            cellsHilighter.HilightRed();
         }
     }
 
     void OnMouseExit()
     {
-        MasHandler masHandler = GetComponent<MasHandler>();
+        CellsHilighter cellsHilighter = GetComponent<CellsHilighter>();
         //masHandlerスクリプトの取得
+
+        CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
+        //CellsCreatorスクリプトの取得
 
         if (masLock == false && 0 < komaNum && komaNum < 31)　//マスロックが掛かってなく、かつ、自駒の場合
         {
-            masHandler.CangeMasColor(180, 180, 180);
-            //キューブの色を戻す
+            cellsHilighter.HilightDefault();
+            //駒があるマスだけハイライト
         }
         if (masTarget == true)
         {
-            masHandler.CangeMasColor(180, 180, 180);
-            //キューブの色を戻す
+            //cellsCreator.HilightKomaExist();
+            //駒があるマスだけハイライト
         }
     }
 
@@ -68,28 +78,21 @@ public class CellsSelector : MonoBehaviour
 
         if ( 0 < komaNum && komaNum < 31)//マスロックが掛かってなく、かつ、自駒の場合
         {
-            
-
-            MasHandler masHandler = GetComponent<MasHandler>();
-            //masHandlerスクリプトの取得
-
-            cellsCreator.GetOriginalPosition(masHandler.masNumber);
-            //masHandlerのマス番号をGetOriginalPositionメソッドに代入→動かす元のマス番号の把握
-
-            cellsCreator.GetCurrentKomaNum();
-            //今クリックしたマスにおいてある動かす駒が何か判別
+           
 
             cellsCreator.UnSelectMas();
-            //マスを一度クリア
+            //マスを全てデフォルトカラーにクリア
 
             CellsHilighter cellsHilighter = GetComponent<CellsHilighter>();
-            cellsHilighter.HilightCells();
+            cellsHilighter.HilightMyField();
             //動かせる場所をハイライト
 
-            masHandler.CangeMasColor(122, 122, 255);
+            cellsHilighter.HilightBlue();
             //マスを青にハイライト
+
             masLock = true;
             //マスをロック
+
             cellsCreator.UnlockField();
             //マスターゲットアンロックフィールドに
         }

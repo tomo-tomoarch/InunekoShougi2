@@ -26,6 +26,8 @@ public class CellsCreator : MonoBehaviour
     public int DestinationKomaNum;
     //駒が動く先のマスにいる駒番号
 
+    public bool SelectDestinationMode = false;
+
     GameObject clickedGameObject;
     //セレクトされるターゲットマスのゲームオブジェクト格納用
 
@@ -74,162 +76,25 @@ public class CellsCreator : MonoBehaviour
         DrawBanmen();
         UnSelectMas();
 
-
-
-
-        /*
-        ////////////////////////////////////////
-        foreach (int a in masu)   //盤面に駒を置く
-        {
-            int number = a;
-            int i = number / 15;
-            int j = number % 15;
-
-
-            if (banmen[j, i] > 0)
-            {
-                GameObject obj = (GameObject)Instantiate(koma, new Vector3(j - (n / 2), 1, i - (n / 2)), Quaternion.identity);
-                //駒を配置
-
-                KomaInfo komaInfo = obj.GetComponent<KomaInfo>();
-                //駒の情報をゲット
-
-                komaInfo.CangeKomColor(255, 255, 0);
-                //駒に色を付ける
-            }
-        };
-        /////////////////////////////////////////
-        */
-
-
-        /*
-       /////////////////////////////////////////
-       GameObject kakuobj = (GameObject)Instantiate(kaku, new Vector3(0, 1, 0), Quaternion.identity);
-       //角を出現させる（デバッグ用）
-       MoveKaku moveKaku = kakuobj.GetComponent<MoveKaku>();
-       //角スクリプトの取得
-       CurrentMasuNum = 112;
-       //角の現在位置マス番号
-        ////////////////////////////////////////
-       */
-
-
-
     }
 
-  
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            SelectDestinationMas();
+
+            if (SelectDestinationMode)
+            {
+                SelectDestination();
+            }
+            else
+            {
+                SelectMas();
+            }
+         
         }
-
-
-            /*
-          if (Input.GetButtonDown("Jump"))
-          {
-              UnSelectMas();
-              //角メソッドの呼び出し
-          }
-          if (Input.GetKeyDown(KeyCode.LeftArrow))
-          {
-              UnSelectMas();
-
-              GameObject gameObject = GameObject.FindWithTag("Koma");
-              Destroy(gameObject);
-              //一度駒をリセット
-
-              GameObject kakuobj = (GameObject)Instantiate(kaku, new Vector3(0, 1, 0), Quaternion.identity);
-              //角を出現させる（デバッグ用）
-              MoveKaku moveKaku = kakuobj.GetComponent<MoveKaku>();
-              //角スクリプトの取得
-
-              int nextKaku = CurrentMasuNum - 1;
-              int i = nextKaku / 15;
-              int j = nextKaku % 15;
-              CurrentMasuNum = nextKaku;
-              //次のマスを計算する
-
-              moveKaku.MoveKakuNext(i - (n / 2), j - (n / 2));
-              //角を動かす
-
-              CheckKaku();
-          }
-          if (Input.GetKeyDown(KeyCode.RightArrow))
-          {
-              UnSelectMas();
-
-              GameObject gameObject = GameObject.FindWithTag("Koma");
-              Destroy(gameObject);
-              //一度駒をリセット
-
-              GameObject kakuobj = (GameObject)Instantiate(kaku, new Vector3(0, 1, 0), Quaternion.identity);
-              //角を出現させる（デバッグ用）
-              MoveKaku moveKaku = kakuobj.GetComponent<MoveKaku>();
-              //角スクリプトの取得
-
-              int nextKaku = CurrentMasuNum + 1;
-              int i = nextKaku / 15;
-              int j = nextKaku % 15;
-              CurrentMasuNum = nextKaku;
-              //次のマスを計算する
-
-              moveKaku.MoveKakuNext(i - (n / 2), j - (n / 2));
-              //角を動かす
-
-              CheckKaku();
-          }
-          if (Input.GetKeyDown(KeyCode.UpArrow))
-          {
-              UnSelectMas();
-
-              GameObject gameObject = GameObject.FindWithTag("Koma");
-              Destroy(gameObject);
-              //一度駒をリセット
-
-              GameObject kakuobj = (GameObject)Instantiate(kaku, new Vector3(0, 1, 0), Quaternion.identity);
-              //角を出現させる（デバッグ用）
-              MoveKaku moveKaku = kakuobj.GetComponent<MoveKaku>();
-              //角スクリプトの取得
-
-              int nextKaku = CurrentMasuNum - 15;
-              int i = nextKaku / 15;
-              int j = nextKaku % 15;
-              CurrentMasuNum = nextKaku;
-              //次のマスを計算する
-
-              moveKaku.MoveKakuNext(i - (n / 2), j - (n / 2));
-              //角を動かす
-
-              CheckKaku();
-          }
-          if (Input.GetKeyDown(KeyCode.DownArrow))
-          {
-              UnSelectMas();
-
-              GameObject gameObject = GameObject.FindWithTag("Koma");
-              Destroy(gameObject);
-              //一度駒をリセット
-
-              GameObject kakuobj = (GameObject)Instantiate(kaku, new Vector3(0, 1, 0), Quaternion.identity);
-              //角を出現させる（デバッグ用）
-              MoveKaku moveKaku = kakuobj.GetComponent<MoveKaku>();
-              //角スクリプトの取得
-
-              int nextKaku = CurrentMasuNum + 15;
-              int i = nextKaku / 15;
-              int j = nextKaku % 15;
-              CurrentMasuNum = nextKaku;
-              //次のマスを計算する
-
-              moveKaku.MoveKakuNext(i - (n / 2), j - (n / 2));
-              //角を動かす
-
-              CheckKaku();
-          }
-              */
-
+          
     }
 
     void DrawBanmen() //盤面を描く
@@ -354,33 +219,10 @@ public class CellsCreator : MonoBehaviour
         {
             //マスオブジェクトそれぞれに処理を行う
 
-            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
             //masHandlerスクリプトの取得
 
-            int k = masHandler.masNumber;
-            //マスの番号を取得する
-
-            if (4 < k / 15 && k / 15 < 10)
-            {
-                if (4 < k % 15 && k % 15 < 10)
-                {
-                    masHandler.CangeMasColor(180, 180, 180);
-                    //フィールドをハイライト
-                }
-                else
-                {
-                    masHandler.CangeMasColor(122, 122, 122);
-                    //色を戻す
-                }
-            }
-            else
-            {
-                masHandler.CangeMasColor(122, 122, 122);
-                //色を戻す
-            }
-
-
-
+            cellsHilighter.HilightDefault();
         }
     }
 
@@ -392,6 +234,10 @@ public class CellsCreator : MonoBehaviour
 
             MasHandler masHandler = obj.GetComponent<MasHandler>();
             //masHandlerスクリプトの取得
+
+            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
             int k = masHandler.masNumber;
             //マスの番号を取得する
 
@@ -399,18 +245,49 @@ public class CellsCreator : MonoBehaviour
             {
                 if (4 < k % 15 && k % 15 < 10)
                 {
-                    masHandler.CangeMasColor(255, 255, 255);
+                    cellsHilighter.HilightWhite();
                     //フィールドをハイライト
                 }
                 else
                 {
-                    masHandler.CangeMasColor(122, 122, 122);
+                    cellsHilighter.HilightDefault();
                     //色を戻す
                 }
             }
             else
             {
-                masHandler.CangeMasColor(122, 122, 122);
+                cellsHilighter.HilightDefault();
+                //色を戻す
+            }
+        }
+    }
+
+    public void HilightKomaExist()　//駒があればハイライト
+    {
+        foreach (GameObject obj in masuGameObject)
+        {
+            //マスオブジェクトそれぞれに処理を行う
+
+            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            //masHandlerスクリプトの取得
+
+            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
+            MasuInfo masuInfo = GetComponent<MasuInfo>();
+            //MasInfoスクリプトの取得
+
+            int k = masuInfo.GetKomaNum(masHandler.masNumber);
+            //駒番号の判別
+
+
+            if (0 < k && k < 31)
+            {
+                cellsHilighter.HilightGray();
+            }
+            else
+            {
+                cellsHilighter.HilightDefault();
                 //色を戻す
             }
         }
@@ -477,7 +354,7 @@ public class CellsCreator : MonoBehaviour
         }
     }
 
-    void SelectDestinationMas() //動く先のマスオブジェクトを取得する
+    void SelectMas() //選択したマスオブジェクトを取得する
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
@@ -489,6 +366,49 @@ public class CellsCreator : MonoBehaviour
 
             CellsSelector cellsSelector = clickedGameObject.GetComponent<CellsSelector>();
             //CellsSelectorスクリプトの取得
+
+            CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
+            MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+            //masuInfo スクリプトの取得
+
+            int b = masuInfo.GetKomaNum(a);
+
+            if (0 < b && b < 31)
+            {
+                CurrentMasuNum = a;
+
+                CurrentKomaNum = b;
+
+                SelectDestinationMode = true;
+
+            }
+            else 
+            { 
+                
+            }
+        }
+    }
+
+
+    public void SelectDestination()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit = new RaycastHit();
+        if (Physics.Raycast(ray, out hit))
+        {
+            clickedGameObject = hit.collider.gameObject;
+            MasHandler masHandler = clickedGameObject.GetComponent<MasHandler>();
+            int a = masHandler.masNumber;
+
+            CellsSelector cellsSelector = clickedGameObject.GetComponent<CellsSelector>();
+            //CellsSelectorスクリプトの取得
+
+            CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
+            //Debug.Log("selectDestination");
 
             if (7 < a / 15 && a / 15 < 10)
             {
@@ -504,26 +424,24 @@ public class CellsCreator : MonoBehaviour
 
                     UnTargetField();
                     //マスターゲットオフ
-                    masHandler.CangeMasColor(255, 255, 255);
+                    cellsHilighter.HilightWhite();
                     //フィールドをハイライト
                     SwitchKomaNum();
                     //駒をスイッチする
                 }
                 else
                 {
-                    
+
                 }
             }
             else
             {
-               
+
             }
 
-            //Debug.Log(clickedGameObject.name);//ゲームオブジェクトの名前を出力
-            //Destroy(clickedGameObject);//ゲームオブジェクトを破壊
         }
+        
     }
-    
 
     public void SwitchKomaNum()//駒番号の交換を行う
     {
