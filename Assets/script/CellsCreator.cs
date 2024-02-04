@@ -26,13 +26,18 @@ public class CellsCreator : MonoBehaviour
     public int DestinationKomaNum;
     //駒が動く先のマスにいる駒番号
 
-    public bool SelectDestinationMode = false;
+    public List<int> MovableAreaNums = new List<int>();
+    //駒が動ける先のマス
+
 
     GameObject clickedGameObject;
     //セレクトされるターゲットマスのゲームオブジェクト格納用
 
     public int[,] masu = new int[n, n];
     //masu二次元配列の初期化
+
+    List<int> onetoTwotwofive = new List<int>();
+    //movablearea計算用二次元配列の初期化
 
     public int[,] banmen = new int[n, n]{
             { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -83,16 +88,7 @@ public class CellsCreator : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-
-            if (SelectDestinationMode)
-            {
-                SelectDestination();
-            }
-            else
-            {
-                SelectNewMasu();
-            }
-         
+            SelectNewMasuOrDestination();
         }
           
     }
@@ -123,6 +119,7 @@ public class CellsCreator : MonoBehaviour
                 //MasNumberメソッドの実行1-224のナンバリングをマス自体に付ける
 
                 masuGameObject.Add(obj);
+                onetoTwotwofive.Add(masu[k, i]);
                 //リストにマス自体を加えマスゲームオブジェクトのリストを作る
 
             }
@@ -241,9 +238,9 @@ public class CellsCreator : MonoBehaviour
             int k = masHandler.masNumber;
             //マスの番号を取得する
 
-            if (7 < k / 15 && k / 15 < 10)
+            if (7 < k / n && k / n < 10)
             {
-                if (4 < k % 15 && k % 15 < 10)
+                if (4 < k % n && k % n < 10)
                 {
                     cellsHilighter.HilightWhite();
                     //フィールドをハイライト
@@ -262,36 +259,7 @@ public class CellsCreator : MonoBehaviour
         }
     }
 
-    public void HilightKomaExist()　//駒があればハイライト
-    {
-        foreach (GameObject obj in masuGameObject)
-        {
-            //マスオブジェクトそれぞれに処理を行う
-
-            MasHandler masHandler = obj.GetComponent<MasHandler>();
-            //masHandlerスクリプトの取得
-
-            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
-            //masHandlerスクリプトの取得
-
-            MasuInfo masuInfo = GetComponent<MasuInfo>();
-            //MasInfoスクリプトの取得
-
-            int k = masuInfo.GetKomaNum(masHandler.masNumber);
-            //駒番号の判別
-
-
-            if (0 < k && k < 31)
-            {
-                cellsHilighter.HilightGray();
-            }
-            else
-            {
-                cellsHilighter.HilightDefault();
-                //色を戻す
-            }
-        }
-    }
+   
 
     public void UnLockMas()　//全てのマスロック解除
     {
@@ -321,9 +289,9 @@ public class CellsCreator : MonoBehaviour
             int k = masHandler.masNumber;
             //マスの番号を取得する
 
-            if (7 < k / 15 && k / 15 < 10)
+            if (7 < k / n && k / n < 10)
             {
-                if (4 < k % 15 && k % 15 < 10)
+                if (4 < k % n && k % n < 10)
                 {
                     cellsSelector.masTarget = true;
                 }
@@ -375,79 +343,129 @@ public class CellsCreator : MonoBehaviour
 
             int b = masuInfo.GetKomaNum(a);
 
-            return (a,b);
+            return (a,b); // masuNum a , KomaNum b をタプルで返す
         } else
         {
-            return (0,0);
+            Debug.Log("error");
+            return (0,0); // 0,0をタプルで返す
         }
     }
-    void SelectNewMasu() //選択したマスオブジェクトを取得する
+    void SelectNewMasuOrDestination() //選択したマスオブジェクトを取得する
     {
 
         var c = Selectmasu();
+        //タプル値を一回受ける
 
         int a = c.Item1;
+        //masuNum
+        //Debug.Log(a+"A");
+
         int b = c.Item2;
-        
+        //komaNum
+        //Debug.Log(b+"B");
+                 
         if (0 < b && b < 31)
         {
             CurrentMasuNum = a;
 
             CurrentKomaNum = b;
 
-            SelectDestinationMode = true;
+            MovableAreaNums = CalcInitMovableArea(a, b);
+            //駒の動けるエリアのマス番号をリストでゲット
+        }
+        else if (MovableAreaNums.Contains(a))//上のリストに含まれている場合
+        {
+            CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
 
+            DestinationMasNum = a;
+            //駒が動く先のマスにいる駒番号
+
+            MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+            //masuInfo スクリプトの取得
+            DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
+            //動かす先の駒の番号を取得する
+
+            UnTargetField();
+            //マスターゲットオフ
+            cellsHilighter.HilightWhite();
+            //フィールドをハイライト
+            SwitchKomaNum();
+            //駒をスイッチする
+              
+          
         }
-        else 
-        { 
-                
-        }
-       
     }
 
-
-    public void SelectDestination()
+    public List<int> CalcInitMovableArea(int a, int b)
     {
+        List<int> MovableArea = new List<int>();
+        //角道をハイライトさせるマスを格納するリスト
 
-        var c = Selectmasu();
-
-        int a = c.Item1;
-
-        CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
-        //masHandlerスクリプトの取得
-
-        if (7 < a / 15 && a / 15 < 10)
+       
+      
+        if (a >184 && a < 192)
         {
-            if (4 < a % 15 && a % 15 < 10)
+            if(b == 11)
             {
-                DestinationMasNum = a;
-                //駒が動く先のマスにいる駒番号
+                foreach (int x in onetoTwotwofive)
+                {
+                    if (4 < x / n && x / n < 10)
+                    {
+                        if (4 < x % n && x % n < 10)
+                        {
+                            MovableArea.Add(x);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
 
-                MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
-                //masuInfo スクリプトの取得
-                DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
-                //動かす先の駒の番号を取得する
+                }
 
-                UnTargetField();
-                //マスターゲットオフ
-                cellsHilighter.HilightWhite();
-                //フィールドをハイライト
-                SwitchKomaNum();
-                //駒をスイッチする
+                return MovableArea;
+            }
+            else if (0 < b && b < 31)
+            {
+                foreach (int x in onetoTwotwofive)
+                {
+                    if (7 < x / n && x / n < 10)
+                    {
+                        if (4 < x % n && x % n < 10)
+                        {
+                            MovableArea.Add(x);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                return MovableArea;
             }
             else
             {
-
+                return MovableArea;
             }
         }
         else
         {
-
+            return MovableArea;
         }
 
-        
-        
     }
+
+
 
     public void SwitchKomaNum()//駒番号の交換を行う
     {
