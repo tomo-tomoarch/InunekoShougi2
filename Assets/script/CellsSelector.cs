@@ -12,8 +12,7 @@ public class CellsSelector : MonoBehaviour
 
     void Start()
     {
-       
-
+      
     }
     
 
@@ -34,6 +33,10 @@ public class CellsSelector : MonoBehaviour
         CellsHilighter cellsHilighter = GetComponent<CellsHilighter>();
         //masHandlerスクリプトの取得
 
+        CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
+
+
+
         if (masLock == false && 0 < komaNum && komaNum< 31)　//マスロックが掛かってなく、かつ、自駒の場合
         {
             cellsHilighter.HilightWhite();
@@ -44,7 +47,7 @@ public class CellsSelector : MonoBehaviour
             cellsHilighter.HilightDefault();
         }
 
-        if (masTarget == true)
+        if (cellsCreator.MovableAreaNums.Contains(selectedPosNumber))
         {
             cellsHilighter.HilightRed();
         }
@@ -63,9 +66,9 @@ public class CellsSelector : MonoBehaviour
             cellsHilighter.HilightDefault();
             //駒があるマスだけハイライト
         }
-        if (masTarget == true)
+        if (cellsCreator.MovableAreaNums.Contains(selectedPosNumber))
         {
-            //cellsCreator.HilightKomaExist();
+            cellsHilighter.HilightWhite();
             //駒があるマスだけハイライト
         }
     }
@@ -78,7 +81,6 @@ public class CellsSelector : MonoBehaviour
 
         if ( 0 < komaNum && komaNum < 31)//マスロックが掛かってなく、かつ、自駒の場合
         {
-           
 
             cellsCreator.UnSelectMas();
             //マスを全てデフォルトカラーにクリア
@@ -87,14 +89,14 @@ public class CellsSelector : MonoBehaviour
             cellsHilighter.HilightMyField();
             //動かせる場所をハイライト
 
-            cellsHilighter.HilightBlue();
-            //マスを青にハイライト
-
             masLock = true;
             //マスをロック
 
             cellsCreator.UnlockField();
             //マスターゲットアンロックフィールドに
+
+            cellsHilighter.HilightBlue();
+            //マスを青にハイライト
         }
     }
 }

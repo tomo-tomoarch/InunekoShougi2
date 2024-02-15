@@ -335,8 +335,10 @@ public class CellsCreator : MonoBehaviour
             CellsSelector cellsSelector = clickedGameObject.GetComponent<CellsSelector>();
             //CellsSelectorスクリプトの取得
 
-            CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
+            //CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
             //masHandlerスクリプトの取得
+            //cellsHilighter.HilightBlue();
+            //青にハイライト
 
             MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
             //masuInfo スクリプトの取得
@@ -492,6 +494,11 @@ public class CellsCreator : MonoBehaviour
         DrawBanmen();
         UnSelectMas();
         UnTargetField();
+        CurrentMasuNum = 0;
+        CurrentKomaNum = 0;
+        DestinationKomaNum = 0;
+        DestinationMasNum = 0;
+        MovableAreaNums = new List<int>();
     }
- 
+
 }

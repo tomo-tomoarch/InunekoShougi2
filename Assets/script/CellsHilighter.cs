@@ -5,6 +5,20 @@ using UnityEngine;
 public class CellsHilighter : MonoBehaviour
 {
     int selectedPosNumber;
+    CellsSelector cellsSelector;
+
+    void Start()
+    {
+        cellsSelector = GetComponent<CellsSelector>();
+    }
+    void Update()
+    {
+                
+        if (cellsSelector.masLock)
+        {
+            HilightBlue();
+        }
+    }
 
     public void HilightMyField()
     {
