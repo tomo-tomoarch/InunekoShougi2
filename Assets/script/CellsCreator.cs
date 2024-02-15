@@ -431,68 +431,77 @@ public class CellsCreator : MonoBehaviour
 
     public List<int> CalcInitMovableArea(int a, int b)
     {
-        List<int> MovableArea = new List<int>();
-        //角道をハイライトさせるマスを格納するリスト
+        List<int> MovableAreas = new List<int>();
+        //マスを格納するリスト
 
        
       
         if (a >184 && a < 192)
         {
+            //打ち駒の場合
+
             if(b == 11)
             {
-                foreach (int x in onetoTwotwofive)
-                {
-                    if (4 < x / n && x / n < 10)
-                    {
-                        if (4 < x % n && x % n < 10)
-                        {
-                            MovableArea.Add(x);
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        continue;
-                    }
-
-                }
-
-                return MovableArea;
+                //マタタビの場合
+                MovableAreas = MovableAreaAllField();
+                return MovableAreas;
             }
-            else if (0 < b && b < 31)
+            else if (0 < b && b < 15)
             {
-                foreach (int x in onetoTwotwofive)
-                {
-                    if (7 < x / n && x / n < 10)
-                    {
-                        if (4 < x % n && x % n < 10)
-                        {
-                            MovableArea.Add(x);
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        continue;
-                    }
-
-                }
-                return MovableArea;
+                //初手の自駒の場合
+                MovableAreas = MovableAreaMyField();
+                return MovableAreas;
+            }
+            else if (16 < b && b < 31)
+            {
+                //取得した打ち駒の場合
+                MovableAreas = MovableAreaAllField();
+                return MovableAreas;
+            }else
+            {
+                return MovableAreas;
+            }
+        }
+        else if(4 < a / n && a / n < 10 && 4 < a % n && a % n < 10)
+        {
+            //盤上の駒の場合
+            if (b == 1)
+            {
+                //1 = Gyoku fuseの場合
+                MovableAreas = MovableAreaGyoku(a);
+                return MovableAreas;
+            }
+            else if (b == 2)
+            {
+                //2 = Kin fuseの場合
+                MovableAreas = MovableAreaKin(a);
+                return MovableAreas;
+            }
+            else if (b == 3)
+            {
+                //3 = hisha fuseの場合
+                MovableAreas = MovableAreaHisha(a);
+                return MovableAreas;
+            }
+            else if (b == 4)
+            {
+                //4 = kaku fuseの場合
+                MovableAreas = MovableAreaKaku(a);
+                return MovableAreas;
+            }
+            else if (b == 5)
+            {
+                //5 = keima fuseの場合
+                MovableAreas = MovableAreaKeima(a);
+                return MovableAreas;
             }
             else
             {
-                return MovableArea;
-            }
-        }
-        else
+                return MovableAreas;
+            }            
+        }else
         {
-            return MovableArea;
+            return MovableAreas;
         }
 
     }
@@ -531,4 +540,223 @@ public class CellsCreator : MonoBehaviour
         MovableAreaNums = new List<int>();
     }
 
+    public List<int> MovableAreaAllField()
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    MovableArea.Add(x);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+    public List<int> MovableAreaMyField()
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (7 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    MovableArea.Add(x);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+    public List<int> MovableAreaGyoku(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if ( x == a + n - 1 || x == a + n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n - 1 || x == a - n + 1 || x == a - n )
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+    public List<int> MovableAreaKin(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if (x == a - n - 1 || x == a - n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n)
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+    public List<int> MovableAreaHisha(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if ( x % n == a % n || x / n == a / n )
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+    public List<int> MovableAreaKaku(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if (x == a + n - 1 || x == a + n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n)
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+    public List<int> MovableAreaKeima(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if (x == a + n - 1 || x == a + n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n)
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
 }
