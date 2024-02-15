@@ -13,7 +13,8 @@ public class CellsHilighter : MonoBehaviour
     }
     void Update()
     {
-                
+       
+
         if (cellsSelector.masLock)
         {
             HilightBlue();
@@ -30,7 +31,14 @@ public class CellsHilighter : MonoBehaviour
         {
             CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
             cellsCreator.HilightField();
+        }else if(selectedPosNumber == 191)
+        {
+            CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
+            cellsCreator.HilightAllField();
         }
+
+        HilightMyKoma();
+
     }
 
     public void HilightDark()
@@ -108,11 +116,20 @@ public class CellsHilighter : MonoBehaviour
             HilightDark();
             //色を戻す
         }
+        HilightMyKoma();
+    }
+    public void HilightMyKoma()
+    {
+        MasHandler masHandler = GetComponent<MasHandler>();
+        //masHandlerスクリプトの取得
+
+        MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+        //masuInfo スクリプトの取得
+        int a = masuInfo.GetKomaNum(masHandler.masNumber);
 
         if (0 < a && a < 31)
         {
             HilightYellow();
         }
     }
-
 }

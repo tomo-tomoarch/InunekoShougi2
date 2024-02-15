@@ -244,6 +244,44 @@ public class CellsCreator : MonoBehaviour
                 {
                     cellsHilighter.HilightWhite();
                     //フィールドをハイライト
+                    cellsHilighter.HilightMyKoma();
+                }
+                else
+                {
+                    cellsHilighter.HilightDefault();
+                    //色を戻す
+                }
+            }
+            else
+            {
+                cellsHilighter.HilightDefault();
+                //色を戻す
+            }
+        }
+
+    }
+    public void HilightAllField()　//初期配置できる2列だけをハイライト
+    {
+        foreach (GameObject obj in masuGameObject)
+        {
+            //マスオブジェクトそれぞれに処理を行う
+
+            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            //masHandlerスクリプトの取得
+
+            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
+            int k = masHandler.masNumber;
+            //マスの番号を取得する
+
+            if (4 < k / n && k / n < 10)
+            {
+                if (4 < k % n && k % n < 10)
+                {
+                    cellsHilighter.HilightWhite();
+                    //フィールドをハイライト
+                    cellsHilighter.HilightMyKoma();
                 }
                 else
                 {
@@ -259,7 +297,6 @@ public class CellsCreator : MonoBehaviour
         }
     }
 
-   
 
     public void UnLockMas()　//全てのマスロック解除
     {
@@ -331,14 +368,7 @@ public class CellsCreator : MonoBehaviour
             clickedGameObject = hit.collider.gameObject;
             MasHandler masHandler = clickedGameObject.GetComponent<MasHandler>();
             int a = masHandler.masNumber;
-
-            CellsSelector cellsSelector = clickedGameObject.GetComponent<CellsSelector>();
-            //CellsSelectorスクリプトの取得
-
-            //CellsHilighter cellsHilighter = clickedGameObject.GetComponent<CellsHilighter>();
-            //masHandlerスクリプトの取得
-            //cellsHilighter.HilightBlue();
-            //青にハイライト
+            
 
             MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
             //masuInfo スクリプトの取得
