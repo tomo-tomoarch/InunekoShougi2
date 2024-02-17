@@ -28,7 +28,7 @@ public class CellsCreator : MonoBehaviour
 
     public List<int> MovableAreaNums = new List<int>();
     //駒が動ける先のマス
-
+    public List<int> BlockedMovableAreaNums = new List<int>();
 
     GameObject clickedGameObject;
     //セレクトされるターゲットマスのゲームオブジェクト格納用
@@ -377,6 +377,8 @@ public class CellsCreator : MonoBehaviour
             MovableAreaNums = CalcInitMovableArea(a, b);
             //駒の動けるエリアのマス番号をリストでゲット
 
+            CheckBlockingKoma(a,b);
+
             HilightKikimichi();
         }
         else if (MovableAreaNums.Contains(a))//上のリストに含まれている場合
@@ -506,13 +508,13 @@ public class CellsCreator : MonoBehaviour
                 {
                     if (4 < a % n && a % n < 10)
                     {
-                        //相手の持ち駒のあるマス確認
+                        //敵AIの持ち駒のあるマス確認
 
                         int b = masuInfo.GetKomaNum(a);
 
                         if (b > 30)
                         {
-                            //相手の盤面の駒確認
+                            //敵AIの盤面の駒確認
                             CurrentOpponentKomaNum.Add(b);
                         }
                     }
@@ -791,7 +793,89 @@ public class CellsCreator : MonoBehaviour
         MovableAreaNums = new List<int>();
     }
 
+    void CheckBlockingKoma(int a,int b)
+    {
+       
+        foreach (GameObject obj in masuGameObject)
+        {
+            //マスオブジェクトそれぞれに処理を行う
 
+            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            //masHandlerスクリプトの取得
+
+            int c = masHandler.masNumber;
+            //int b = masuInfo.GetKomaNum(a);
+
+            if (MovableAreaNums.Contains(c))
+            {
+                if (b % 5 == 2)
+                {
+                    if (a/ n == c / n && c > a)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                       
+                    }
+                    else if (a % n == c % n && a > c)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                    else if (a/ n == c / n && a > c)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                    else if (a % n == c % n && c > a)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                }else if(b % 5 == 3)
+                {
+                    if (0 == (a - c) % (n + 1) && c > a)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                    else if (0 == (a - c) % (n - 1) && a > c)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                    else if (0 == (a - c) % (n + 1) && a > c)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+                    else if (0 == (a - c) % (n - 1) && c > a)
+                    {
+                        if (c != a)
+                        {
+                            MovableAreaNums.Remove(c);
+                        }
+                    }
+
+                }
+   
+            }
+        }
+     
+    }
     public List<int> MovableAreaAllField()
     {
         List<int> MovableArea = new List<int>();
