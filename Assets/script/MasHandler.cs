@@ -5,8 +5,7 @@ using UnityEngine;
 public class MasHandler : MonoBehaviour
 {
     public int masNumber;
-
-
+        
     public void MasNumber(int a) 
     {
         masNumber = a;

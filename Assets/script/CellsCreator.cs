@@ -151,64 +151,6 @@ public class CellsCreator : MonoBehaviour
         //盤面上の駒が何か判別する
     }
 
-    public void CheckKaku()
-    {
-        List<int> HilightMasuNum = new List<int>();
-        //角道をハイライトさせるマスを格納するリスト
-
-        int i;
-        int masNum;
-
-        for(i=-10;i<10;i++ )
-        {
-            masNum = CurrentMasuNum + 14 * i;
-            //角道その１
-
-            if (masNum > 224 || masNum< 0 ){ continue; }
-            //0-224以外は飛ばす
-
-            HilightMasuNum.Add(masNum); 
-            //マスナンバーの格納
-        }
-
-        for (i = -10; i < 10; i++)
-        {
-            masNum = CurrentMasuNum + 16 * i;
-            //角道その２
-
-            if (masNum > 224 || masNum < 0) { continue; }
-            //0-224以外は飛ばす
-
-            HilightMasuNum.Add(masNum);
-            //マスナンバーの格納
-        }
-
-        foreach (GameObject obj in masuGameObject)
-        {
-            //マスオブジェクトそれぞれに処理を行う
-
-            MasHandler masHandler = obj.GetComponent<MasHandler>();
-            //masHandlerスクリプトの取得
-
-            int k = masHandler.masNumber;
-            //マスの番号を取得する
-
-            foreach (int num in HilightMasuNum)
-            {
-                //角道のマス番号それぞれに処理を行う
-
-                if (k == num)
-                {
-                    //マス番号と角道の番号が一致する場合
-
-                    masHandler.CangeMasColor(255,0,0);
-                    //色を変える
-                }
-            }
-           
-        }
-       
-    }
 
     public void UnSelectMas() //フィールド全てをハイライト
     {
@@ -297,6 +239,36 @@ public class CellsCreator : MonoBehaviour
         }
     }
 
+    public void HilightKikimichi()
+    {
+
+        foreach (GameObject obj in masuGameObject)
+        {
+            //マスオブジェクトそれぞれに処理を行う
+
+            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            //masHandlerスクリプトの取得
+
+            int a = masHandler.masNumber;
+            //マスの番号を取得する
+
+            CellsHilighter cellsHilighter = obj.GetComponent<CellsHilighter>();
+            //masHandlerスクリプトの取得
+
+
+            if (MovableAreaNums.Contains(a))
+            {
+                cellsHilighter.HilightWhite();
+                //フィールドをハイライト
+                cellsHilighter.HilightMyKoma();
+       
+            }
+            else
+            {
+
+            }
+        }
+    }
 
     public void UnLockMas()　//全てのマスロック解除
     {
@@ -404,6 +376,8 @@ public class CellsCreator : MonoBehaviour
 
             MovableAreaNums = CalcInitMovableArea(a, b);
             //駒の動けるエリアのマス番号をリストでゲット
+
+            HilightKikimichi();
         }
         else if (MovableAreaNums.Contains(a))//上のリストに含まれている場合
         {
@@ -418,15 +392,194 @@ public class CellsCreator : MonoBehaviour
             DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
             //動かす先の駒の番号を取得する
 
-            UnTargetField();
-            //マスターゲットオフ
-            cellsHilighter.HilightWhite();
-            //フィールドをハイライト
-            SwitchKomaNum();
-            //駒をスイッチする
-              
-          
+           
+            if (DestinationKomaNum>30 && DestinationKomaNum < 60)
+            {
+                TakeKoma();
+            }
+            else
+            {
+                UnTargetField();
+                //マスターゲットオフ
+                cellsHilighter.HilightWhite();
+                //フィールドをハイライト
+                SwitchKomaNum();
+                //駒をスイッチする
+
+                StartCoroutine(WaitOneSecond());
+            }
+                       
         }
+
+    }
+
+    IEnumerator WaitOneSecond()
+    {
+        //Debug.Log("Wait start");
+
+        // 1秒待機
+        yield return new WaitForSeconds(1);
+
+        OpponentTurnBegin();
+    }
+
+    void OpponentTurnBegin()
+    {
+        List<int> CurrentOpponentKomaNum = new List<int>();
+        List<int> CurrentOpponentMovableField = new List<int>();
+
+        MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+
+        foreach (GameObject obj in masuGameObject)
+        {
+            //マスオブジェクトそれぞれに処理を行う
+
+            MasHandler masHandler = obj.GetComponent<MasHandler>();
+            //masHandlerスクリプトの取得
+
+            int a = masHandler.masNumber;
+
+            
+            if (33 < a && a < 56)
+            {
+                //相手の持ち駒のあるマス確認
+            
+                int b = masuInfo.GetKomaNum(a);
+
+                if (b > 30)
+                {
+                    //相手の持ち駒の種類確認
+                    CurrentOpponentKomaNum.Add(b);
+                }
+             
+            }
+        }
+
+        //手駒がある場合
+        if (CurrentOpponentKomaNum.Count > 0)
+        {
+            // 手駒リストからランダムに要素を選択
+            int komaindex = UnityEngine.Random.Range(0, CurrentOpponentKomaNum.Count);
+            CurrentKomaNum = CurrentOpponentKomaNum[komaindex];
+            //駒番号の取得
+
+            foreach (GameObject obj in masuGameObject)
+            {
+                //マスオブジェクトそれぞれに処理を行う
+
+                MasHandler masHandler = obj.GetComponent<MasHandler>();
+                //masHandlerスクリプトの取得
+                int a = masHandler.masNumber;
+
+                int b = masuInfo.GetKomaNum(a);
+
+                if (b == CurrentKomaNum)
+                {
+                    CurrentMasuNum = a;
+                    //マス番号の取得
+                }
+            }
+
+            //打てる範囲からランダムにマスを選択
+            CurrentOpponentMovableField = MovableAreaEnemyField();
+            int masuindex = UnityEngine.Random.Range(0, CurrentOpponentMovableField.Count);
+
+            DestinationMasNum = CurrentOpponentMovableField[masuindex];
+            //打つ先を取得
+
+            DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
+            //打つ先の駒番号
+        }
+        else　//手駒がない場合
+        {
+            foreach (GameObject obj in masuGameObject)
+            {
+                //マスオブジェクトそれぞれに処理を行う
+
+                MasHandler masHandler = obj.GetComponent<MasHandler>();
+                //masHandlerスクリプトの取得
+
+                int a = masHandler.masNumber;
+
+
+                if (4 < a / n && a / n < 10)
+                {
+                    if (4 < a % n && a % n < 10)
+                    {
+                        //相手の持ち駒のあるマス確認
+
+                        int b = masuInfo.GetKomaNum(a);
+
+                        if (b > 30)
+                        {
+                            //相手の盤面の駒確認
+                            CurrentOpponentKomaNum.Add(b);
+                        }
+                    }
+                }
+            }
+
+            // 手駒リストからランダムに要素を選択
+            int komaindex = UnityEngine.Random.Range(0, CurrentOpponentKomaNum.Count);
+            CurrentKomaNum = CurrentOpponentKomaNum[komaindex];
+            //駒番号の取得
+
+            foreach (GameObject obj in masuGameObject)
+            {
+                //マスオブジェクトそれぞれに処理を行う
+
+                MasHandler masHandler = obj.GetComponent<MasHandler>();
+                //masHandlerスクリプトの取得
+                int a = masHandler.masNumber;
+
+                int b = masuInfo.GetKomaNum(a);
+
+                if (b == CurrentKomaNum)
+                {
+                    CurrentMasuNum = a;
+                    //マス番号の取得
+                }
+            }
+            if(CurrentKomaNum == 31)
+            {
+                CurrentOpponentMovableField = MovableAreaGyoku(CurrentMasuNum);
+            }
+            else if (CurrentKomaNum == 32)
+            {
+                CurrentOpponentMovableField = MovableAreaEnemyKin(CurrentMasuNum);
+            }
+            else if (CurrentKomaNum == 33)
+            {
+                CurrentOpponentMovableField = MovableAreaHisha(CurrentMasuNum);
+            }
+            else if (CurrentKomaNum == 34)
+            {
+                CurrentOpponentMovableField = MovableAreaKaku(CurrentMasuNum);
+            }
+            else if (CurrentKomaNum == 35)
+            {
+                CurrentOpponentMovableField = MovableAreaEnemyKeima(CurrentMasuNum);
+            }
+            
+            //打てる範囲からランダムにマスを選択
+
+            int masuindex = UnityEngine.Random.Range(0, CurrentOpponentMovableField.Count);
+            DestinationMasNum = CurrentOpponentMovableField[masuindex];
+            //打つ先を取得
+
+            DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
+            //打つ先の駒番号
+        }
+
+        if( DestinationKomaNum >0 && DestinationKomaNum < 31)
+        {
+            TakeKoma();
+        }
+        else
+        {
+            SwitchKomaNum();
+        }
+        
     }
 
     public List<int> CalcInitMovableArea(int a, int b)
@@ -507,7 +660,6 @@ public class CellsCreator : MonoBehaviour
     }
 
 
-
     public void SwitchKomaNum()//駒番号の交換を行う
     {
         MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
@@ -530,7 +682,6 @@ public class CellsCreator : MonoBehaviour
         //駒番号の交換を行う
 
         ResetBanmen();
-        DrawBanmen();
         UnSelectMas();
         UnTargetField();
         CurrentMasuNum = 0;
@@ -539,6 +690,107 @@ public class CellsCreator : MonoBehaviour
         DestinationMasNum = 0;
         MovableAreaNums = new List<int>();
     }
+
+    public void TakeKoma()
+    {
+        MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+        //masuInfo スクリプトの取得
+
+        masuInfo.GetCoordinate(CurrentMasuNum);
+
+        int xc = masuInfo.ColumnNumber;
+        int yc = masuInfo.LowNumber;
+
+        banmen[xc, yc] = 0;
+
+
+        if (DestinationKomaNum <= 30)
+        {
+            if (DestinationKomaNum == 11)
+            {
+                banmen[2, 11] = 41;
+            }
+            else if (DestinationKomaNum % 5 == 0)
+            {
+                banmen[3, 6] = 50;
+
+            }
+            else if (DestinationKomaNum % 5 == 1)
+            {
+                Debug.Log("game end");
+            }
+            else if (DestinationKomaNum % 5 == 2)
+            {
+                banmen[3, 9] = 47;
+            }
+            else if (DestinationKomaNum % 5 == 3)
+            {
+                banmen[3, 8] = 48;
+            }
+            else if (DestinationKomaNum % 5 == 4)
+            {
+                banmen[3, 7] = 49;
+            }
+            else
+            {
+
+            }
+            
+        }
+        else
+        {
+            if (DestinationKomaNum == 11)
+            {
+                banmen[12, 12] = 11;
+            }
+            else if (DestinationKomaNum % 5 == 0)
+            {
+                banmen[11, 9] = 20;
+
+            }
+            else if (DestinationKomaNum % 5 == 1)
+            {
+                Debug.Log("game end");
+            }
+            else if (DestinationKomaNum % 5 == 2)
+            {
+                banmen[11, 6] = 17;
+            }
+            else if (DestinationKomaNum % 5 == 3)
+            {
+                banmen[11, 7] = 18;
+            }
+            else if (DestinationKomaNum % 5 == 4)
+            {
+                banmen[11, 8] = 19;
+            }
+            else
+            {
+
+            }
+
+        }
+        
+
+            masuInfo.GetCoordinate(DestinationMasNum);
+
+        int xd = masuInfo.ColumnNumber;
+        int yd = masuInfo.LowNumber;
+
+        banmen[xd, yd] = CurrentKomaNum;
+
+        //駒番号の移動を行う
+
+        ResetBanmen();
+        UnSelectMas();
+        UnTargetField();
+        CurrentMasuNum = 0;
+        CurrentKomaNum = 0;
+        DestinationKomaNum = 0;
+        DestinationMasNum = 0;
+        MovableAreaNums = new List<int>();
+    }
+
 
     public List<int> MovableAreaAllField()
     {
@@ -592,6 +844,41 @@ public class CellsCreator : MonoBehaviour
         return MovableArea;
     }
 
+    public List<int> MovableAreaEnemyField()
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 7)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+                    //masuInfo スクリプトの取得
+
+                    int b = masuInfo.GetKomaNum(x);
+
+                    if(b == 0)
+                    {
+                        MovableArea.Add(x);
+                    }
+                                        
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
     public List<int> MovableAreaGyoku(int a)
     {
         List<int> MovableArea = new List<int>();
@@ -625,6 +912,8 @@ public class CellsCreator : MonoBehaviour
         }
         return MovableArea;
     }
+
+
     public List<int> MovableAreaKin(int a)
     {
         List<int> MovableArea = new List<int>();
@@ -658,6 +947,7 @@ public class CellsCreator : MonoBehaviour
         }
         return MovableArea;
     }
+
     public List<int> MovableAreaHisha(int a)
     {
         List<int> MovableArea = new List<int>();
@@ -702,7 +992,7 @@ public class CellsCreator : MonoBehaviour
             {
                 if (4 < x % n && x % n < 10)
                 {
-                    if (x == a + n - 1 || x == a + n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n)
+                    if (0 == (a - x) % (n + 1) || 0 == (a - x) % (n - 1))
                     {
                         MovableArea.Add(x);
                     }
@@ -710,7 +1000,7 @@ public class CellsCreator : MonoBehaviour
                     {
                         continue;
                     }
-
+                      
                 }
                 else
                 {
@@ -736,7 +1026,76 @@ public class CellsCreator : MonoBehaviour
             {
                 if (4 < x % n && x % n < 10)
                 {
+                    if (x == a - 2*n - 1 || x == a - 2*n + 1 )
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+
+    public List<int> MovableAreaEnemyKin(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
                     if (x == a + n - 1 || x == a + n + 1 || x == a + n || x == a + 1 || x == a - 1 || x == a - n)
+                    {
+                        MovableArea.Add(x);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+        }
+        return MovableArea;
+    }
+
+    public List<int> MovableAreaEnemyKeima(int a)
+    {
+        List<int> MovableArea = new List<int>();
+
+        foreach (int x in onetoTwotwofive)
+        {
+            if (4 < x / n && x / n < 10)
+            {
+                if (4 < x % n && x % n < 10)
+                {
+                    if (x == a + 2 * n - 1 || x == a + 2 * n + 1)
                     {
                         MovableArea.Add(x);
                     }

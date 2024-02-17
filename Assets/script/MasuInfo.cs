@@ -41,4 +41,5 @@ public class MasuInfo : MonoBehaviour
         //CellsCreator スクリプトの取得
         return cellsCreator.banmen[ColumnNumber, LowNumber];
     }
+
 }

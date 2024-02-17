@@ -27,14 +27,22 @@ public class CellsHilighter : MonoBehaviour
         //masHandlerスクリプトの取得
         selectedPosNumber = masHandler.masNumber;
 
-        if (185 <= selectedPosNumber && selectedPosNumber <= 189)
+        
+
+        if (185 <= selectedPosNumber && selectedPosNumber <= 189 )
         {
             CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
             cellsCreator.HilightField();
-        }else if(selectedPosNumber == 191)
+        }
+        else if (selectedPosNumber == 191)
         {
             CellsCreator cellsCreator = GameObject.FindWithTag("GameController").GetComponent<CellsCreator>();
             cellsCreator.HilightAllField();
+        }
+        else 
+        {
+            
+            
         }
 
         HilightMyKoma();
@@ -45,14 +53,14 @@ public class CellsHilighter : MonoBehaviour
     {
         MasHandler masHandler = GetComponent<MasHandler>();
         //masHandlerスクリプトの取得
-        masHandler.CangeMasColor(122, 122, 122);
+        masHandler.CangeMasColor(0, 0, 0);
     }
 
     public void HilightGray()
     {
         MasHandler masHandler = GetComponent<MasHandler>();
         //masHandlerスクリプトの取得
-        masHandler.CangeMasColor(180, 180, 180);
+        masHandler.CangeMasColor(145, 126, 59);
     }
 
     public void HilightWhite()
