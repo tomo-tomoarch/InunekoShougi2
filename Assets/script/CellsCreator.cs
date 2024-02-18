@@ -377,7 +377,7 @@ public class CellsCreator : MonoBehaviour
             MovableAreaNums = CalcInitMovableArea(a, b);
             //駒の動けるエリアのマス番号をリストでゲット
 
-            CheckBlockingKoma(a,b);
+            MovableAreaNums = CheckBlockingKoma(a,b,MovableAreaNums);
 
             HilightKikimichi();
         }
@@ -545,22 +545,27 @@ public class CellsCreator : MonoBehaviour
             if(CurrentKomaNum == 31)
             {
                 CurrentOpponentMovableField = MovableAreaGyoku(CurrentMasuNum);
+                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
             }
             else if (CurrentKomaNum == 32)
             {
                 CurrentOpponentMovableField = MovableAreaEnemyKin(CurrentMasuNum);
+                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum, CurrentKomaNum, CurrentOpponentMovableField);
             }
             else if (CurrentKomaNum == 33)
             {
                 CurrentOpponentMovableField = MovableAreaHisha(CurrentMasuNum);
+                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
             }
             else if (CurrentKomaNum == 34)
             {
                 CurrentOpponentMovableField = MovableAreaKaku(CurrentMasuNum);
+                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
             }
             else if (CurrentKomaNum == 35)
             {
                 CurrentOpponentMovableField = MovableAreaEnemyKeima(CurrentMasuNum);
+                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
             }
             
             //打てる範囲からランダムにマスを選択
@@ -576,6 +581,10 @@ public class CellsCreator : MonoBehaviour
         if( DestinationKomaNum >0 && DestinationKomaNum < 31)
         {
             TakeKoma();
+        }
+        else if (DestinationKomaNum>30)
+        {
+            OpponentTurnBegin();
         }
         else
         {
@@ -793,9 +802,12 @@ public class CellsCreator : MonoBehaviour
         MovableAreaNums = new List<int>();
     }
 
-    void CheckBlockingKoma(int a,int b)
+    List<int> CheckBlockingKoma(int a,int b, List<int>currentlist)
     {
-       
+
+        MasuInfo masuInfo = GameObject.FindWithTag("GameController").GetComponent<MasuInfo>();
+        //masuInfo スクリプトの取得
+
         foreach (GameObject obj in masuGameObject)
         {
             //マスオブジェクトそれぞれに処理を行う
@@ -804,78 +816,81 @@ public class CellsCreator : MonoBehaviour
             //masHandlerスクリプトの取得
 
             int c = masHandler.masNumber;
-            //int b = masuInfo.GetKomaNum(a);
+            int d = masuInfo.GetKomaNum(c);
 
-            if (MovableAreaNums.Contains(c))
+            if (currentlist.Contains(c) && d >0)
             {
-                if (b % 5 == 2)
+                if (b % 5 == 3)
                 {
+                    
+
                     if (a/ n == c / n && c > a)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
-                       
+                        currentlist.Remove(c + 1);
+                        currentlist.Remove(c + 2);
+                        currentlist.Remove(c + 3);
                     }
                     else if (a % n == c % n && a > c)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+
+                        currentlist.Remove(c - n);
+                        currentlist.Remove(c - (2 * n));
+                        currentlist.Remove(c - (3 * n));
                     }
                     else if (a/ n == c / n && a > c)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+
+                        currentlist.Remove(c - 1);
+                        currentlist.Remove(c - 2);
+                        currentlist.Remove(c - 3);
+
                     }
                     else if (a % n == c % n && c > a)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+
+                        currentlist.Remove(c + n);
+                        currentlist.Remove(c + (2 * n));
+                        currentlist.Remove(c + (3 * n));
+
                     }
-                }else if(b % 5 == 3)
+                }else if(b % 5 == 4)
                 {
                     if (0 == (a - c) % (n + 1) && c > a)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+
+                        currentlist.Remove(c+(n+1));
+                        currentlist.Remove(c + (n + 1)*2);
+                        currentlist.Remove(c + (n + 1) * 3);
                     }
                     else if (0 == (a - c) % (n - 1) && a > c)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+                        currentlist.Remove(c - (n - 1));
+                        currentlist.Remove(c - (n - 1) * 2);
+                        currentlist.Remove(c - (n - 1) * 3);
                     }
                     else if (0 == (a - c) % (n + 1) && a > c)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+                        currentlist.Remove(c - (n + 1));
+                        currentlist.Remove(c - (n + 1) * 2);
+                        currentlist.Remove(c - (n + 1) * 3);
                     }
                     else if (0 == (a - c) % (n - 1) && c > a)
                     {
-                        if (c != a)
-                        {
-                            MovableAreaNums.Remove(c);
-                        }
+                        currentlist.Remove(c + (n - 1));
+                        currentlist.Remove(c + (n - 1) * 2);
+                        currentlist.Remove(c + (n - 1) * 3);
                     }
 
                 }
    
             }
+            
         }
-     
+
+        return currentlist;
+
     }
+
     public List<int> MovableAreaAllField()
     {
         List<int> MovableArea = new List<int>();
