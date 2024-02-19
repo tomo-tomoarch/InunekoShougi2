@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class CellsCreator : MonoBehaviour
 {
@@ -75,6 +76,20 @@ public class CellsCreator : MonoBehaviour
     //                                           53= Hisha Uti Nari, 54=Kaku Uti Nari, 55 Keima Uti Nari,
     //                                          58= Hisha bare, 59= kaku bare,  60= keima bare,
 
+    //手ごま毎の打つ手リスト
+    public List<int> CurrentOpponentMovableFieldGyoku = new List<int>();
+    public List<int> CurrentOpponentMovableFieldKinn = new List<int>();
+    public List<int> CurrentOpponentMovableFieldHisha = new List<int>();
+    public List<int> CurrentOpponentMovableFieldKaku = new List<int>();
+    public List<int> CurrentOpponentMovableFieldKeima = new List<int>();
+    //手ごま毎の打つ手ポイントリスト
+    public List<int> GyokuHandPoint = new List<int>();
+    public List<int> KinnHandPoint = new List<int>();
+    public List<int> HishaHandPoint = new List<int>();
+    public List<int> KakuHandPoint = new List<int>();
+    public List<int> KeimaHandPoint = new List<int>();
+
+    public List<int> HandPointComparison = new List<int>();
 
     void Start()
     {
@@ -406,11 +421,10 @@ public class CellsCreator : MonoBehaviour
                 cellsHilighter.HilightWhite();
                 //フィールドをハイライト
                 SwitchKomaNum();
-                //駒をスイッチする
-
-                StartCoroutine(WaitOneSecond());
+                //駒をスイッチする                
             }
-                       
+
+            StartCoroutine(WaitOneSecond());
         }
 
     }
@@ -442,15 +456,15 @@ public class CellsCreator : MonoBehaviour
             int a = masHandler.masNumber;
 
             
-            if (33 < a && a < 56)
+            if (34 < a && a < 40 || 49 < a && a < 55)
             {
-                //相手の持ち駒のあるマス確認
+                //敵AIの持ち駒のあるマス確認
             
                 int b = masuInfo.GetKomaNum(a);
 
                 if (b > 30)
                 {
-                    //相手の持ち駒の種類確認
+                    //敵AIの持ち駒の種類確認
                     CurrentOpponentKomaNum.Add(b);
                 }
              
@@ -522,75 +536,259 @@ public class CellsCreator : MonoBehaviour
             }
 
             // 手駒リストからランダムに要素を選択
-            int komaindex = UnityEngine.Random.Range(0, CurrentOpponentKomaNum.Count);
-            CurrentKomaNum = CurrentOpponentKomaNum[komaindex];
+            //int komaindex = UnityEngine.Random.Range(0, CurrentOpponentKomaNum.Count);
+            //CurrentKomaNum = CurrentOpponentKomaNum[komaindex];
             //駒番号の取得
 
-            foreach (GameObject obj in masuGameObject)
+            int GyokuCurrentMasuNum = 0;
+            int KinnCurrentMasuNum = 0;
+            int HishaCurrentMasuNum = 0;
+            int KakuCurrentMasuNum = 0;
+            int KeimaCurrentMasuNum = 0;
+
+            foreach (int komaindex in CurrentOpponentKomaNum)
             {
-                //マスオブジェクトそれぞれに処理を行う
-
-                MasHandler masHandler = obj.GetComponent<MasHandler>();
-                //masHandlerスクリプトの取得
-                int a = masHandler.masNumber;
-
-                int b = masuInfo.GetKomaNum(a);
-
-                if (b == CurrentKomaNum)
+                foreach (GameObject obj in masuGameObject)
                 {
-                    CurrentMasuNum = a;
-                    //マス番号の取得
+                    //マスオブジェクトそれぞれに処理を行う
+
+                    MasHandler masHandler = obj.GetComponent<MasHandler>();
+                    //masHandlerスクリプトの取得
+                    int a = masHandler.masNumber;
+
+                    int b = masuInfo.GetKomaNum(a);
+
+                    if (b == komaindex)
+                    {
+                        CurrentMasuNum = a;
+                        //マス番号の取得
+                    }
+                }
+
+                if (komaindex == 31)
+                {
+                    GyokuCurrentMasuNum = CurrentMasuNum;
+                    CurrentOpponentMovableFieldGyoku = MovableAreaGyoku(CurrentMasuNum);
+                    CurrentOpponentMovableFieldGyoku = CheckBlockingKoma(CurrentMasuNum, komaindex, CurrentOpponentMovableFieldGyoku);
+                }
+                else if (komaindex == 32)
+                {
+                    KinnCurrentMasuNum = CurrentMasuNum;
+                    CurrentOpponentMovableFieldKinn = MovableAreaEnemyKin(CurrentMasuNum);
+                    CurrentOpponentMovableFieldKinn = CheckBlockingKoma(CurrentMasuNum, komaindex, CurrentOpponentMovableFieldKinn);
+                }
+                else if (komaindex == 33)
+                {
+                    HishaCurrentMasuNum = CurrentMasuNum;
+                    CurrentOpponentMovableFieldHisha = MovableAreaHisha(CurrentMasuNum);
+                    CurrentOpponentMovableFieldHisha = CheckBlockingKoma(CurrentMasuNum, komaindex, CurrentOpponentMovableFieldHisha);
+                }
+                else if (komaindex == 34)
+                {
+                    KakuCurrentMasuNum = CurrentMasuNum;
+                    CurrentOpponentMovableFieldKaku = MovableAreaKaku(CurrentMasuNum);
+                    CurrentOpponentMovableFieldKaku = CheckBlockingKoma(CurrentMasuNum, komaindex, CurrentOpponentMovableFieldKaku);
+                }
+                else if (komaindex == 35)
+                {
+                    KeimaCurrentMasuNum = CurrentMasuNum;
+                    CurrentOpponentMovableFieldKeima = MovableAreaEnemyKeima(CurrentMasuNum);
+                    CurrentOpponentMovableFieldKeima = CheckBlockingKoma(CurrentMasuNum, komaindex, CurrentOpponentMovableFieldKeima);
                 }
             }
-            if(CurrentKomaNum == 31)
+
+            int i;
+
+            GyokuHandPoint = new List<int>();
+            KinnHandPoint = new List<int>();
+            HishaHandPoint = new List<int>();
+            KakuHandPoint = new List<int>();
+            KeimaHandPoint = new List<int>();
+
+            for (i = 0; i < CurrentOpponentMovableFieldGyoku.Count; i++)
             {
-                CurrentOpponentMovableField = MovableAreaGyoku(CurrentMasuNum);
-                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
+                int k = CurrentOpponentMovableFieldGyoku[i];
+                int l = masuInfo.GetKomaNum(k);
+                int m = CalcMovableHandPoint(k, l);
+
+                GyokuHandPoint.Add(m);
             }
-            else if (CurrentKomaNum == 32)
+            for (i = 0; i < CurrentOpponentMovableFieldKinn.Count; i++)
             {
-                CurrentOpponentMovableField = MovableAreaEnemyKin(CurrentMasuNum);
-                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum, CurrentKomaNum, CurrentOpponentMovableField);
+                int k = CurrentOpponentMovableFieldKinn[i];
+                int l = masuInfo.GetKomaNum(k);
+                int m = CalcMovableHandPoint(k, l);
+
+                KinnHandPoint.Add(m);
             }
-            else if (CurrentKomaNum == 33)
+            for (i = 0; i < CurrentOpponentMovableFieldHisha.Count; i++)
             {
-                CurrentOpponentMovableField = MovableAreaHisha(CurrentMasuNum);
-                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
+                int k = CurrentOpponentMovableFieldHisha[i];
+                int l = masuInfo.GetKomaNum(k);
+                int m = CalcMovableHandPoint(k, l);
+
+                HishaHandPoint.Add(m);
             }
-            else if (CurrentKomaNum == 34)
+            for (i = 0; i < CurrentOpponentMovableFieldKaku.Count; i++)
             {
-                CurrentOpponentMovableField = MovableAreaKaku(CurrentMasuNum);
-                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
+                int k = CurrentOpponentMovableFieldKaku[i];
+                int l = masuInfo.GetKomaNum(k);
+                int m = CalcMovableHandPoint(k, l);
+
+                KakuHandPoint.Add(m);
             }
-            else if (CurrentKomaNum == 35)
+            for (i = 0; i < CurrentOpponentMovableFieldKeima.Count; i++)
             {
-                CurrentOpponentMovableField = MovableAreaEnemyKeima(CurrentMasuNum);
-                CurrentOpponentMovableField = CheckBlockingKoma(CurrentMasuNum,CurrentKomaNum, CurrentOpponentMovableField);
+                int k = CurrentOpponentMovableFieldKeima[i];
+                int l = masuInfo.GetKomaNum(k);
+                int m = CalcMovableHandPoint(k, l);
+
+                KeimaHandPoint.Add(m);
+            }
+
+            List<int> HandPointComparison = new List<int>();
+
+            if(GyokuHandPoint.Count != 0)
+            {
+                HandPointComparison.Add(GyokuHandPoint.Max());
+            }
+            else
+            {
+                GyokuHandPoint.Add(0);
             }
             
+            if(KinnHandPoint.Count != 0)
+            {
+                HandPointComparison.Add(KinnHandPoint.Max());
+            }
+            else
+            {
+                KinnHandPoint.Add(0);
+            }
+            
+            if(HishaHandPoint.Count != 0)
+            {
+                HandPointComparison.Add(HishaHandPoint.Max());
+            }else
+            {
+                HishaHandPoint.Add(0);
+            }
+            
+            if(KakuHandPoint.Count != 0)
+            {
+                HandPointComparison.Add(KakuHandPoint.Max());
+            }
+            else
+            {
+                KakuHandPoint.Add(0);
+            }
+           
+            if(KeimaHandPoint.Count != 0)
+            {
+                HandPointComparison.Add(KeimaHandPoint.Max());
+            }
+            else
+            {
+                KeimaHandPoint.Add(0);
+            }
+            
+
+            int BestPointIndex = HandPointComparison.IndexOf(HandPointComparison.Max());
+            
+
+            if(BestPointIndex == 0)
+            {
+                int GyokuBestHandIndex = GyokuHandPoint.IndexOf(GyokuHandPoint.Max());
+                DestinationMasNum = CurrentOpponentMovableFieldGyoku[GyokuBestHandIndex];
+                CurrentMasuNum = GyokuCurrentMasuNum;
+                CurrentKomaNum = 31;
+            }
+            else if(BestPointIndex == 1)
+            {
+                int KinnBestHandIndex = KinnHandPoint.IndexOf(KinnHandPoint.Max());
+                DestinationMasNum = CurrentOpponentMovableFieldKinn[KinnBestHandIndex];
+                CurrentMasuNum = KinnCurrentMasuNum;
+                CurrentKomaNum = 32;
+            }
+            else if (BestPointIndex == 2)
+            {
+                int HishaBestHandIndex = HishaHandPoint.IndexOf(HishaHandPoint.Max());
+                DestinationMasNum = CurrentOpponentMovableFieldHisha[HishaBestHandIndex];
+                CurrentMasuNum = HishaCurrentMasuNum;
+                CurrentKomaNum = 33;
+            }
+            else if (BestPointIndex == 3)
+            {
+                int KakuBestHandIndex = KakuHandPoint.IndexOf(KakuHandPoint.Max());
+                DestinationMasNum = CurrentOpponentMovableFieldKaku[KakuBestHandIndex];
+                CurrentMasuNum = KakuCurrentMasuNum;
+                CurrentKomaNum = 34;
+            }
+            else{
+                int KeimaBestHandIndex = KeimaHandPoint.IndexOf(KeimaHandPoint.Max());
+                DestinationMasNum = CurrentOpponentMovableFieldKeima[KeimaBestHandIndex];
+                CurrentMasuNum = KeimaCurrentMasuNum;
+                CurrentKomaNum = 35;
+            }
+  
             //打てる範囲からランダムにマスを選択
-
-            int masuindex = UnityEngine.Random.Range(0, CurrentOpponentMovableField.Count);
-            DestinationMasNum = CurrentOpponentMovableField[masuindex];
+            //int masuindex = UnityEngine.Random.Range(0, CurrentOpponentMovableField.Count);
+            //DestinationMasNum = CurrentOpponentMovableField[masuindex];
             //打つ先を取得
-
-            DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
+             DestinationKomaNum = masuInfo.GetKomaNum(DestinationMasNum);
             //打つ先の駒番号
         }
 
         if( DestinationKomaNum >0 && DestinationKomaNum < 31)
         {
+
             TakeKoma();
-        }
-        else if (DestinationKomaNum>30)
+
+        }else if (DestinationKomaNum > 30)
         {
-            OpponentTurnBegin();
+            Debug.Log(DestinationKomaNum);
         }
         else
         {
             SwitchKomaNum();
         }
         
+    }
+
+    public int CalcMovableHandPoint(int a, int b)
+    {
+
+        if (b == 11) {
+
+            return 10;
+
+        } else if (b % 5 == 1 && b<31)
+        {
+
+            return 9;
+
+        }
+        else if (b % 5 == 2 && b < 31)
+        {
+            return 6;
+
+        }
+        else if (b % 5 == 3 && b < 31)
+        {
+            return 8;
+        }
+        else if (b % 5 == 4 && b < 31)
+        {
+            return 7;
+        }
+        else if (b % 5 == 5 && b < 31)
+        {
+            return 5;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
     public List<int> CalcInitMovableArea(int a, int b)
